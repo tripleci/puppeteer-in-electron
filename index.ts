@@ -109,17 +109,20 @@ export const getPage = async (browser: Browser, window: BrowserWindow, allowBlan
         "to execute JavaScript which requires the window having loaded a URL.");
     }
   }
-
-  const guid = uuid.v4();
-  await window.webContents.executeJavaScript(`window.puppeteer = "${guid}"`);
-  const pages = await browser.pages();
-  const guids = await Promise.all(pages.map((testPage) => testPage.evaluate("window.puppeteer")));
-  const index = guids.findIndex((testGuid) => testGuid === guid);
-  await window.webContents.executeJavaScript("delete window.puppeteer");
-  const page = pages[index];
-  if (!page) {
-    throw new Error("Unable to find puppeteer Page from BrowserWindow. Please report this.");
-  }
+  const context = await browser.createIncognitoBrowserContext();
+  // Create a new page in a pristine context.
+  return await context.newPage();
+//   const guid = uuid.v4();
+//   await window.webContents.executeJavaScript(`window.puppeteer = "${guid}"`);
+//   const pages = await browser.pages();
+//   const guids = await Promise.all(pages.map((testPage) => testPage.evaluate("window.puppeteer")));
+//   const index = guids.findIndex((testGuid) => testGuid === guid);
+//   await window.webContents.executeJavaScript("delete window.puppeteer");
+//   const page = pages[index];
+//   if (!page) {
+//     throw new Error("Unable to find puppeteer Page from BrowserWindow. Please report this.");
+//   }
+  
   return page;
 };
 
@@ -128,3 +131,4 @@ export default {
   getPage,
   initialize
 };
+ 
